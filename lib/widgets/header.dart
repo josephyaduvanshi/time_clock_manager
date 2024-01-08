@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:provider/provider.dart';
 
 import '../constants.dart';
-import '../controllers/MenuAppController.dart';
 import '../responsive.dart';
 
 class Header extends StatelessWidget {
@@ -18,7 +16,9 @@ class Header extends StatelessWidget {
         if (!Responsive.isDesktop(context))
           IconButton(
             icon: const Icon(Icons.menu),
-            onPressed: context.read<MenuAppController>().controlMenu,
+            onPressed: () {
+              Scaffold.of(context).openDrawer();
+            },
           ),
         if (!Responsive.isMobile(context))
           Text(
@@ -79,6 +79,11 @@ class SearchField extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextField(
       decoration: InputDecoration(
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: defaultPadding,
+          vertical: defaultPadding / 2,
+        ),
+        isDense: true,
         hintText: "Search",
         fillColor: secondaryColor,
         filled: true,

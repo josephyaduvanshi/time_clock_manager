@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "121264627719",
+    "project_id": "timeclockmanage",
+    "storage_bucket": "timeclockmanage.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:121264627719:android:0f69855f7b16beed8b0aa2",
+        "android_client_info": {
+          "package_name": "com.example.time_clock_manager"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDtj0QzZaC0ox8u7U623q5qYmZpC8bNh7Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

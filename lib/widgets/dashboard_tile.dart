@@ -1,9 +1,8 @@
-import 'dart:convert';
-import 'dart:math';
-import 'dart:typed_data';
-
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:time_clock_manager/controllers/auth_controller.dart';
+import 'package:time_clock_manager/utils/clockin_import_utils.dart';
+import 'package:time_clock_manager/utils/time_tactic_utils.dart';
+import 'package:velocity_x/velocity_x.dart';
 
 import '../constants.dart';
 import '../responsive.dart';
@@ -22,49 +21,75 @@ class DashboardTiles extends StatelessWidget {
         Align(
           alignment: Alignment.topLeft,
           child: Text(
-            "Daily Reports",
+            "Daily Summary",
             style: Theme.of(context).textTheme.titleMedium,
           ),
         ),
-        Center(
-          child: ElevatedButton.icon(
-            style: TextButton.styleFrom(
-              padding: EdgeInsets.symmetric(
-                horizontal: defaultPadding * 1.5,
-                vertical:
-                    defaultPadding / (Responsive.isMobile(context) ? 2 : 1),
+        Wrap(
+          alignment: WrapAlignment.center,
+          runAlignment: WrapAlignment.spaceBetween,
+          spacing: defaultPadding * 7,
+          runSpacing: defaultPadding,
+          children: [
+            OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                padding: EdgeInsets.symmetric(
+                  horizontal: defaultPadding * 1.5,
+                  vertical:
+                      defaultPadding / (Responsive.isMobile(context) ? 2 : 1),
+                ),
               ),
+              onPressed: _onPressedClockInOut,
+              icon: const Icon(Icons.cloud_upload_rounded),
+              label: const Text("Import Clock In/Out"),
+            ).shimmer(
+              primaryColor: Colors.purpleAccent,
+              secondaryColor: Colors.blue,
+              duration: const Duration(seconds: 7),
             ),
-            onPressed: () async {
-              FilePickerResult? result = await FilePicker.platform.pickFiles(
-                type: FileType.custom,
-                allowedExtensions: ['xlsx', 'xls', 'csv', 'txt'],
-              );
-              if (result != null) {
-                Uint8List? fileBytes = result.files.single.bytes;
-                String fileContent = utf8.decode(fileBytes!);
-                // Use 'fileContent' as needed
-                final userHours = extractUserHours(
-                  fileContent,
-                );
-                double calculatedTotalHours =
-                    userHours.fold(0, (sum, item) => sum + item['hours']);
-                double reportedTotalHours =
-                    extractReportTotalHours(fileContent);
-                Map<String, String> dates = extractDates(fileContent);
-                final jsonData = convertToJson(
-                    userHours, calculatedTotalHours, reportedTotalHours, dates);
-                print(jsonData);
-                print("====================================");
-                // print(fileContent); // Fo
-              } else {
-                print('No file selected.');
-              }
-            },
-            icon: const Icon(Icons.add),
-            label: const Text("Import Daily Report"),
-          ),
-        ),
+            OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                padding: EdgeInsets.symmetric(
+                  horizontal: defaultPadding * 1.5,
+                  vertical:
+                      defaultPadding / (Responsive.isMobile(context) ? 2 : 1),
+                ),
+              ),
+              onPressed: _onPressedClockInOut,
+              icon: const Icon(Icons.cloud_upload_rounded),
+              label: const Text("Import Daily Report"),
+            ).shimmer(
+              primaryColor: Colors.purpleAccent,
+              secondaryColor: Colors.blue,
+              duration: const Duration(seconds: 7),
+            ),
+            OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                padding: EdgeInsets.symmetric(
+                  horizontal: defaultPadding * 1.5,
+                  vertical:
+                      defaultPadding / (Responsive.isMobile(context) ? 2 : 1),
+                ),
+              ),
+              onPressed: _onPressedClockInOut,
+              icon: const Icon(Icons.cloud_upload_rounded),
+              label: const Text("Import Deliveries"),
+            ).shimmer(
+              primaryColor: Colors.purpleAccent,
+              secondaryColor: Colors.blue,
+              duration: const Duration(seconds: 7),
+            ),
+          ],
+        ).p(16),
         const SizedBox(height: defaultPadding),
         Responsive(
           mobile: DailyInfoCardGrid(
@@ -81,57 +106,13 @@ class DashboardTiles extends StatelessWidget {
   }
 }
 
-List<Map<String, dynamic>> extractUserHours(String text) {
-  final RegExp pattern = RegExp(r'([A-Z]+) - ([A-Za-z. ]+)\s+([\d.]+)');
-  final matches = pattern.allMatches(text);
-
-  List<Map<String, dynamic>> userHours = [];
-
-  for (final match in matches) {
-    String id = match.group(1).toString().trim();
-    String name = match.group(2).toString().trim();
-    double hours = double.tryParse(match.group(3).toString().trim()) ?? 0.0;
-
-    userHours.add({'id': id, 'name': name, 'hours': hours});
+void _onPressedClockInOut() async {
+  final content = await TimeTacticUtils.importFiles();
+  if (content != null) {
+    final clockinUtils = ClockinReportUtils();
+    final clockinReport = clockinUtils.finalJsonConvert(content);
+    print(clockinReport);
+  } else {
+    print('No file selected.');
   }
-
-  return userHours;
-}
-
-double extractReportTotalHours(String text) {
-  final RegExp totalPattern = RegExp(r'Report Total\s+([\d.]+)');
-  final totalMatch = totalPattern.firstMatch(text);
-  return totalMatch != null
-      ? double.tryParse(totalMatch.group(1).toString().trim()) ?? 0.0
-      : 0.0;
-}
-
-Map<String, String> extractDates(String text) {
-  final RegExp datePattern =
-      RegExp(r'From:\s+(\d{2}/\d{2}/\d{4})\s+To:\s+(\d{2}/\d{2}/\d{4})');
-  final dateMatch = datePattern.firstMatch(text);
-  return {
-    'startDate': dateMatch?.group(1) ?? '',
-    'endDate': dateMatch?.group(2) ?? ''
-  };
-}
-
-String convertToJson(
-    List<Map<String, dynamic>> data,
-    double calculatedTotalHours,
-    double reportedTotalHours,
-    Map<String, String> dates) {
-  Map<String, dynamic> finalData = {
-    'employees': data,
-    'calculatedTotalHours': calculatedTotalHours,
-    'reportedTotalHours': reportedTotalHours,
-    'startDate': dates['startDate'],
-    'endDate': dates['endDate']
-  };
-  return jsonEncode(finalData);
-}
-
-double roundToPrecision(double value, int places) {
-  double mod = pow(10.0, places).toDouble();
-  return ((value * mod).round().toDouble() / mod);
 }
