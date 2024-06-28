@@ -53,8 +53,9 @@ class ClockinReportFireStoreController extends GetxController {
       Uint8List content = response.bodyBytes;
       final blob = html.Blob([content]);
       final url_ = html.Url.createObjectUrlFromBlob(blob);
+      // ignore: unused_local_variable
       final anchor = html.AnchorElement(href: url_)
-        ..setAttribute("download", "${filename}.xlsx") 
+        ..setAttribute("download", "${filename}.xlsx")
         ..click();
 
       html.Url.revokeObjectUrl(url_);

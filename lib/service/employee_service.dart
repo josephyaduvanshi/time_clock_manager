@@ -1,4 +1,3 @@
-
 import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -8,13 +7,15 @@ import '../models/enployee_model.dart';
 
 class EmployeeFirestoreService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
-final store = isGreenway.value ? "Greenway" : "Weston";
+  final store = isGreenway.value ? "Greenway" : "Weston";
   Stream<List<EmployeeModel>> getEmployees() {
     log('store: $store');
-    return _db.collection('users') 
-    .where('store', isEqualTo: store)
-    .snapshots().map((snapshot) => snapshot.docs
-        .map((doc) => EmployeeModel.fromMap(doc.data(), doc.id))
-        .toList());
+    return _db
+        .collection('users')
+        .where('store', isEqualTo: store)
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+            .map((doc) => EmployeeModel.fromMap(doc.data(), doc.id))
+            .toList());
   }
 }

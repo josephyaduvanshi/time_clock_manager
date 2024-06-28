@@ -237,12 +237,14 @@ class CustomRosterPage extends StatelessWidget {
                                                             roster
                                                                 .position.name,
                                                             style: TextStyle(
-                                                              fontSize:  12,
-                                                              color:  Colors.white,
+                                                              fontSize: 12,
+                                                              color:
+                                                                  Colors.white,
                                                             ),
                                                           ),
                                                           backgroundColor:
-                                                              Colors.purple.shade400,
+                                                              Colors.purple
+                                                                  .shade400,
                                                         ),
                                                         SizedBox(height: 4),
                                                         Row(
@@ -259,7 +261,7 @@ class CustomRosterPage extends StatelessWidget {
                                                             Text(
                                                               '${DateFormat.jm().format(roster.startTime)} - ${DateFormat.jm().format(roster.finishTime)}',
                                                               style: TextStyle(
-                                                                color:  Colors
+                                                                color: Colors
                                                                     .white,
                                                               ),
                                                             ),

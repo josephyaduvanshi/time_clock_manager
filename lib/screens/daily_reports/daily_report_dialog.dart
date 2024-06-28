@@ -208,7 +208,6 @@ class DailyReportDialog extends StatelessWidget {
   Widget _buildDatePicker(BuildContext context) {
     return Obx(() {
       return TextField(
-        
         controller: TextEditingController(
             text: DateFormat('yyyy-MM-dd').format(selectedDate.value)),
         decoration: InputDecoration(

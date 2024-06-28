@@ -39,7 +39,8 @@ class DashboardStaffPage extends StatelessWidget {
         icon: Icons.approval,
         label: "Replacement Requests",
         onTap: () {
-          print("Stores");
+          Get.toNamed(RouteStrings.replacementRequests);
+          print("Replacement Requests");
         },
       ),
       MenuItem(

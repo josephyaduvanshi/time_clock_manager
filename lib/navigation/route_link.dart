@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:time_clock_manager/bindings/main_screen_bindings.dart';
+import 'package:time_clock_manager/navigation/replacement_requests_bindings.dart';
 import 'package:time_clock_manager/navigation/route_strings.dart';
 import 'package:time_clock_manager/navigation/staff_availability_bindings.dart';
 import 'package:time_clock_manager/navigation/view_roster_page_bindings.dart';
@@ -8,6 +9,7 @@ import 'package:time_clock_manager/screens/auth/sign_up_page.dart';
 import 'package:time_clock_manager/screens/dashboard/dashboard_screen.dart';
 import 'package:time_clock_manager/screens/main/main_screen.dart';
 import 'package:time_clock_manager/screens/daily_reports/daily_reports_page.dart';
+import 'package:time_clock_manager/screens/replacement_requests_page.dart';
 import 'package:time_clock_manager/screens/reports_screen.dart';
 import 'package:time_clock_manager/screens/roster/create_roster_screen.dart';
 import 'package:time_clock_manager/screens/roster/staff_availability_page.dart';
@@ -72,6 +74,11 @@ class RouteLink {
       name: RouteStrings.viewRoster,
       page: () => ViewRosterPage(),
       binding: ViewRosterBindings(),
+    ),
+    GetPage(
+      name: RouteStrings.replacementRequests,
+      page: () => ReplacementRequestsPage(),
+      binding: ReplacementRequestsBindings(),
     ),
     GetPage(
       name: RouteStrings.createRoster,

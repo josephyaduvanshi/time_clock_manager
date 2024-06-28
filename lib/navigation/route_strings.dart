@@ -15,6 +15,7 @@ class RouteStrings {
   static const String usersPin = '/usersPin';
   static const String createRoster = '/create-roster';
   static const String viewRoster = '/view-roster';
+  static const String replacementRequests = '/replacement-requests';
   static const String roster = '/roster';
   static const String myRoster = '/myRoster';
   static const String rosterDetails = '/roster-details';

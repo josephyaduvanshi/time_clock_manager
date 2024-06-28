@@ -24,6 +24,5 @@ class EmployeeAvailabilityController extends GetxController {
       employees.assignAll(employeeData);
     });
     log('employees: ${employees.map((element) => element.toMap())}');
-    
   }
 }

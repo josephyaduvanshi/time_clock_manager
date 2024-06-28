@@ -34,13 +34,13 @@ class UserModel {
     required this.pin,
   });
 
-factory UserModel.fromMap(Map<String, dynamic> json, String id) => UserModel(
+  factory UserModel.fromMap(Map<String, dynamic> json, String id) => UserModel(
         id: id,
         email: json["email"] ?? '',
         name: json["name"] ?? '',
         dateOfBirth: json["dateOfBirth"],
         mobileNumber: json["mobileNumber"],
-        store:   json["store"] != null ? storeValues.map[json["store"]] : null,
+        store: json["store"] != null ? storeValues.map[json["store"]] : null,
         avatar: json["avatar"] ?? '',
         role: roleValues.map[json["role"]] ?? Role.STAFF,
         status: statusValues.map[json["status"]] ?? Status.ACTIVE,

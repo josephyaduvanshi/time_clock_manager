@@ -6,18 +6,25 @@ import 'package:time_clock_manager/main.dart';
 import 'package:time_clock_manager/models/enployee_model.dart';
 import 'package:time_clock_manager/models/roster_model.dart';
 import 'package:time_clock_manager/service/roster_firestore_service.dart';
+import '../models/request_model.dart';
+import '../service/firebase_replacment_requests_service.dart';
 import 'auth_controller.dart';
 
 enum ViewType { Weekly, Fortnightly, Monthly }
 
 class RosterController extends GetxController {
   final FirestoreService _firestoreService = FirestoreService();
+  final FirestoreRequestReplacementService _requestService =
+      FirestoreRequestReplacementService();
+
   var rosters = <RosterModel>[].obs;
   var userRosters = <RosterModel>[].obs;
   var employees = <EmployeeModel>[].obs;
   var selectedEmployee = Rx<EmployeeModel?>(null);
   var isLoading = false.obs;
   var isCustomView = isAdmin.value.obs;
+  var sentRequests = <RequestModel>[].obs;
+  var receivedRequests = <RequestModel>[].obs;
 
   GlobalKey<FormFieldState> employeeDropdownKey = GlobalKey<FormFieldState>();
   GlobalKey<FormFieldState> positionDropdownKey = GlobalKey<FormFieldState>();
@@ -54,6 +61,51 @@ class RosterController extends GetxController {
     _firestoreService.getEmployees().listen((employeeData) {
       employees.assignAll(employeeData);
     });
+  }
+
+  Future<void> sendReplacementRequest(RequestModel request) async {
+    try {
+      await _requestService.sendReplacementRequest(request);
+      Get.snackbar('Success', 'Replacement request sent successfully');
+    } catch (e) {
+      Get.snackbar('Error', e.toString());
+    }
+  }
+
+  Future<void> respondToRequest(
+    String userId,
+    String requestId,
+    RequestStatus status,
+    String replyMessage,
+  ) async {
+    try {
+      await _requestService.respondToRequest(
+        requestId,
+        userId,
+        status,
+        replyMessage,
+      );
+      Get.snackbar('Success', 'Response sent successfully');
+    } catch (e) {
+      Get.snackbar('Error', e.toString());
+    }
+  }
+
+  Stream<List<RequestModel>> getSentRequests(String senderId) {
+    return _requestService.getSentRequests(senderId);
+  }
+
+  Stream<List<RequestModel>> getReceivedRequests(String recipientId) {
+    return _requestService.getReceivedRequests(recipientId).map((requests) {
+      return requests.where((request) {
+        return request.recipientId == "ALL" ||
+            request.recipientId == recipientId;
+      }).toList();
+    });
+  }
+
+  String generateIdRequests() {
+    return _requestService.generateId();
   }
 
   void onDaySelected(DateTime selectedDay, DateTime focusedDay) {

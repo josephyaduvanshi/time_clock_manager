@@ -128,7 +128,7 @@ class AuthController extends GetxController {
     }
   }
 
-  void handleAuthChanged(User?  firebaseUser) async {
+  void handleAuthChanged(User? firebaseUser) async {
     try {
       //get user data from firestore
       log.log('handleAuthChanged() started');

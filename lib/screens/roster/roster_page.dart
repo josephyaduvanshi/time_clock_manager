@@ -27,6 +27,14 @@ class RosterPage extends StatelessWidget {
       },
     ),
     MenuItem(
+      icon: Icons.emergency_rounded,
+      label: "Replacment Requests",
+      onTap: () {
+        Get.toNamed(RouteStrings.replacementRequests);
+        print("Replacement Requests");
+      },
+    ),
+    MenuItem(
       icon: Icons.request_page,
       label: "Leave Requests",
       onTap: () {

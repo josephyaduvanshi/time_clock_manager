@@ -8,6 +8,8 @@ import 'package:time_clock_manager/models/roster_model.dart';
 import 'package:velocity_x/velocity_x.dart';
 
 import '../../constants.dart';
+import '../../models/request_model.dart';
+import '../../models/enployee_model.dart';
 import '../../responsive.dart';
 import 'custom_roaster_view_page.dart';
 
@@ -309,9 +311,174 @@ class _ViewRosterPageState extends State<ViewRosterPage> {
                           fontSize2: fontSizeSmall)),
                 ],
               ),
+              16.widthBox,
+              OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                        foregroundColor: Colors.white,
+                        side: BorderSide(color: Colors.blue),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8)),
+                        backgroundColor: Colors.transparent,
+                      ),
+                      onPressed: () async {
+                        await _showReplacementRequestDialog(roster);
+                      },
+                      child: Text('Request Replacement',
+                          style: TextStyle(
+                              color: Colors.white, fontSize: fontSizeSmall)))
+                  .pOnly(top: 60),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Future<void> _showReplacementRequestDialog(RosterModel roster) async {
+    TextEditingController messageController = TextEditingController();
+    EmployeeModel? selectedEmployee;
+    final employees = controller.employees;
+
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          actionsAlignment: MainAxisAlignment.spaceBetween,
+          title: "Request Replacement"
+              .text
+              .xl2
+              .bold
+              .isIntrinsic
+              .color(Colors.white)
+              .make(),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                _buildDialogRow('User', roster.userName),
+                _buildDialogRow('Position', roster.position.name),
+                _buildDialogRow('Store', roster.store.name),
+                _buildDialogRow(
+                    'Start Time', DateFormat.jm().format(roster.startTime)),
+                _buildDialogRow(
+                    'Finish Time', DateFormat.jm().format(roster.finishTime)),
+                _buildDialogRow('Description', roster.shiftDescription),
+                _buildDialogRow("Hours",
+                    "${roster.finishTime.difference(roster.startTime).inHours.toDouble().toPrecision(2)} hrs"),
+                DropdownButtonFormField<EmployeeModel>(
+                  value: selectedEmployee,
+                  hint: Text("Select Employee"),
+                  items: [
+                    DropdownMenuItem(
+                      value: null,
+                      child: Text("ALL"),
+                    ),
+                    ...employees.map((employee) {
+                      return DropdownMenuItem(
+                        value: employee,
+                        child: Text(employee.name),
+                      );
+                    }).toList(),
+                  ],
+                  onChanged: (value) {
+                    selectedEmployee = value;
+                  },
+                  decoration: InputDecoration(
+                    labelText: 'Send To',
+                    border: OutlineInputBorder(),
+                  ),
+                ).paddingSymmetric(vertical: 10),
+                TextField(
+                  controller: messageController,
+                  decoration: InputDecoration(
+                    labelText: 'Message',
+                    hintText: 'Enter your message here',
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            OutlinedButton(
+              style: OutlinedButton.styleFrom(
+                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                foregroundColor: Colors.white,
+                side: BorderSide(color: Colors.blue),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                backgroundColor: Colors.transparent,
+              ),
+              child: Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            OutlinedButton(
+              style: OutlinedButton.styleFrom(
+                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                foregroundColor: Colors.white,
+                side: BorderSide(color: Colors.blue),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                backgroundColor: Colors.transparent,
+              ),
+              child: Text('Send Request'),
+              onPressed: () {
+                final recipientId = selectedEmployee?.id ?? 'ALL';
+                controller.sendReplacementRequest(
+                  RequestModel(
+                    id: controller.generateIdRequests(),
+                    userName: roster.userName,
+                    position: roster.position.name,
+                    store: roster.store.name,
+                    startTime: roster.startTime,
+                    finishTime: roster.finishTime,
+                    shiftDescription: roster.shiftDescription,
+                    message: messageController.text,
+                    senderId: roster.userId,
+                    recipientId: recipientId,
+                    recipientStatuses: {
+                      recipientId: {
+                        'status':
+                            RequestStatus.Pending.toString().split('.').last,
+                        'name': selectedEmployee?.name ?? 'ALL',
+                      },
+                    },
+                    recipientMessages: {recipientId: messageController.text},
+                  ),
+                );
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildDialogRow(String title, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            title,
+            style: TextStyle(color: Colors.white),
+          ),
+          SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              value,
+              style: TextStyle(color: Colors.white),
+              textAlign: TextAlign.end,
+            ),
+          ),
+        ],
       ),
     );
   }

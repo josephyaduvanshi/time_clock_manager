@@ -75,7 +75,7 @@ class _ReportCardState extends State<ReportCard> {
                     spacing: 8.0,
                     children:
                         widget.report.onlineOrderSources.entries.map((entry) {
-                      return  Chip(
+                      return Chip(
                         color: entry.key == "Manoosh Online"
                             ? MaterialStateProperty.all(Colors.green)
                             : entry.key == "DoorDash"
@@ -140,7 +140,6 @@ class _ReportCardState extends State<ReportCard> {
                           ],
                         ),
                       ).py(8);
-
                     }).toList(),
                   ).py(8),
                   Divider(),
