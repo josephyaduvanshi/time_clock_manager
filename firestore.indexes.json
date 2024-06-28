@@ -1,0 +1,10 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "timeRecords",
+      "queryScope": "COLLECTION_GROUP",
+      "fields": [{ "fieldPath": "timestamp", "order": "ASCENDING" }]
+    }
+  ],
+  "fieldOverrides": []
+}

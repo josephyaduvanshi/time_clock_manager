@@ -1,19 +1,54 @@
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:intl/intl.dart';
+
 class ClockinReportUtils {
   List<Map<String, dynamic>> extractUserHours(String text) {
-    final RegExp pattern = RegExp(r'([A-Z]+) - ([A-Za-z. ]+)\s+([\d.]+)');
-    final matches = pattern.allMatches(text);
+    final RegExp userPattern = RegExp(r'([A-Z ]+) - ([A-Za-z. ]+)\s+([\d.]+)');
+    final RegExp hoursPattern =
+        RegExp(r'(\d{2}/\d{2}/\d{2,4})\s+\d+\s+\d+\s+([\d.]+)');
+    final userMatches = userPattern.allMatches(text);
+    final hoursMatches = hoursPattern.allMatches(text);
 
     List<Map<String, dynamic>> userHours = [];
+    int hoursIndex = 0;
 
-    for (final match in matches) {
-      String id = match.group(1).toString().trim();
-      String name = match.group(2).toString().trim();
-      double hours = double.tryParse(match.group(3).toString().trim()) ?? 0.0;
+    for (final userMatch in userMatches) {
+      Map<String, double> dailyHours = {};
+      // double totalHours = 0.0;
 
-      userHours.add({'id': id, 'name': name, 'hours': hours});
+      while (hoursIndex < hoursMatches.length &&
+          hoursMatches.elementAt(hoursIndex).start < userMatch.start) {
+        final hoursMatch = hoursMatches.elementAt(hoursIndex);
+        String dateString = hoursMatch.group(1)!.trim();
+        DateTime date = DateFormat('dd/MM/yy').parse(dateString);
+        String formattedDate =
+            DateFormat('yyyy-MM-dd 00:00:00.000').format(date);
+        double hours = double.tryParse(hoursMatch.group(2)!.trim()) ?? 0.0;
+
+        // Accumulate hours by date
+        dailyHours.update(formattedDate,
+            (existingHours) => roundToPrecision(existingHours + hours, 2),
+            ifAbsent: () => hours);
+        // totalHours += hours;
+        hoursIndex++;
+      }
+
+      String id = userMatch.group(1)!.trim();
+      String name = userMatch.group(2)!.trim();
+
+      // Convert the dailyHours map to a list of maps
+      List<Map<String, dynamic>> aggregatedHoursList = dailyHours.entries
+          .map((entry) => {'date': entry.key, 'hours': entry.value})
+          .toList();
+
+      userHours.add({
+        'id': id,
+        'name': name,
+        'hours': aggregatedHoursList,
+        // 'total_hours': totalHours
+      });
     }
 
     return userHours;
@@ -57,14 +92,17 @@ class ClockinReportUtils {
     return ((value * mod).round().toDouble() / mod);
   }
 
-  String finalJsonConvert(String data) {
-    final userHours = extractUserHours(
-      data,
-    );
-    double calculatedTotalHours =
-        userHours.fold(0, (sum, item) => sum + item['hours']);
-    double reportedTotalHours = extractReportTotalHours(data);
-    Map<String, String> dates = extractDates(data);
+  String finalJsonConvert(String text) {
+    final userHours = extractUserHours(text);
+    double calculatedTotalHours = userHours.fold(0, (sum, user) {
+      return sum +
+          (user['hours'] as List<Map<String, dynamic>>).fold(0,
+              (innerSum, hoursEntry) {
+            return innerSum + (hoursEntry['hours']);
+          });
+    });
+    double reportedTotalHours = extractReportTotalHours(text);
+    Map<String, String> dates = extractDates(text);
     final jsonData = convertToJson(
       userHours,
       roundToPrecision(calculatedTotalHours, 2),

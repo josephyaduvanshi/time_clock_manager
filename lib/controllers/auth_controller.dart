@@ -1,9 +1,12 @@
-import 'dart:developer';
+import 'dart:developer' as log;
+import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:time_clock_manager/main.dart';
+import 'package:time_clock_manager/models/enployee_model.dart';
 import 'package:time_clock_manager/navigation/route_strings.dart';
 
 import '../constants.dart';
@@ -17,7 +20,11 @@ class AuthController extends GetxController {
   final RxBool isPasswordHidden1 = true.obs;
   final RxBool isPasswordHidden2 = true.obs;
 
+  final RxString userName = ''.obs;
+
   String usersDocFirebase = 'users';
+  final RxString _store = ''.obs;
+  String get store => _store.value;
 
   final RxBool isLoadingForLogin = false.obs;
   final RxBool isLoadingForSignUp = false.obs;
@@ -47,7 +54,7 @@ class AuthController extends GetxController {
 
   void changeSlidingValue(int index) {
     sliding.value = index;
-    log(sliding.value.toString());
+    log.log(sliding.value.toString());
     update();
   }
 
@@ -66,19 +73,22 @@ class AuthController extends GetxController {
   bool get isNewUser => _isNewUser.value;
 
   set isNewUser(bool value) => _isNewUser.value = value;
-  String? _userRole;
+  final Rx<Role> _userRole = Role.STAFF.obs;
 
   UserModel? get firestoreUserModel => firestoreUser.value;
   bool get loggedIn => _loggedIn.value;
-  String? get userRole => _userRole;
+  Role get userRole => _userRole.value;
   Stream<User?> get user => _auth.authStateChanges();
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
+  final RxString _uid = ''.obs;
+  String get uid => _uid.value;
+
   @override
   void onReady() async {
-    log(firebaseUser.string);
+    log.log(firebaseUser.string);
     ever(firebaseUser, handleAuthChanged);
-    log(firebaseUser.string);
+    log.log(firebaseUser.string);
     firebaseUser.bindStream(user);
     super.onReady();
   }
@@ -96,31 +106,49 @@ class AuthController extends GetxController {
 
   Stream<UserModel> streamFirestoreUser() {
     try {
-      log('streamFirestoreUser() started');
-      log(firebaseUser.value!.toString());
+      log.log('streamFirestoreUser() started');
+      log.log(firebaseUser.value!.toString());
       if (firebaseUser.value != null) {
         return _db
             .doc('/$usersDocFirebase/${firebaseUser.value!.uid}')
             .snapshots()
-            .map((snapshot) => UserModel.fromMap(snapshot.data()!));
+            .map((snapshot) {
+          final user = UserModel.fromMap(snapshot.data()!, snapshot.id);
+          _userRole.value = user.role;
+          _uid.value = user.id;
+          // _store.value = user.store?.name.toLowerCase() ?? '';
+          return user;
+        });
       } else {
         return const Stream.empty();
       }
     } catch (e) {
-      log(e.toString());
+      log.log(e.toString());
       rethrow;
     }
   }
 
-  void handleAuthChanged(firebaseUser) async {
+  void handleAuthChanged(User?  firebaseUser) async {
     try {
       //get user data from firestore
-      log('handleAuthChanged() started');
+      log.log('handleAuthChanged() started');
       if (firebaseUser?.uid != null) {
         firestoreUser.bindStream(streamFirestoreUser());
         if (firestoreUser.value != null) {
-          _userRole = firestoreUser.value!.role;
+          _userRole.value = firestoreUser.value!.role;
+          _uid.value = firestoreUser.value!.id;
+          userName.value = firestoreUser.value!.name;
+          // _store.value = firestoreUser.value!.store?.name.toLowerCase() ?? '';
         }
+      }
+      // Fetch store information from Firestore
+      final userDoc =
+          await _db.doc('/$usersDocFirebase/${firebaseUser?.uid}').get();
+      if (userDoc.exists) {
+        final userData = userDoc.data()!;
+        _store.value = userData['store']?.toString() ?? '';
+        isGreenway.value = _store.value.toLowerCase() == 'greenway';
+        log.log('Storeeee ==== ${_store.value}');
       }
 
       if (firebaseUser == null) {
@@ -131,7 +159,7 @@ class AuthController extends GetxController {
         update();
       }
     } catch (e) {
-      log(e.toString());
+      log.log("Error HandleAuthChanged: $e");
     }
   }
 
@@ -141,27 +169,27 @@ class AuthController extends GetxController {
           .doc('/$usersDocFirebase/${firebaseUser.value!.uid}')
           .get()
           .then((documentSnapshot) =>
-              UserModel.fromMap(documentSnapshot.data()!));
+              UserModel.fromMap(documentSnapshot.data()!, documentSnapshot.id));
     } on FirebaseException catch (e) {
-      log("FirebaseException: ${e.message}");
+      log.log("FirebaseException: ${e.message}");
       rethrow;
     } catch (e) {
-      log(e.toString());
+      log.log(e.toString());
       rethrow;
     }
   }
 
   Future<bool> updateUserFirestore(UserModel user, User firebaseUser) async {
-    log('updateUserFirestore() started');
+    log.log('updateUserFirestore() started');
     bool isSuccessFull = false;
     try {
-      log(user.toJson().toString());
+      log.log(user.toJson().toString());
       await _db
           .doc('/$usersDocFirebase/${firebaseUser.uid}')
           .update(user.toJson())
           .timeout(const Duration(seconds: 10), onTimeout: () {
         isSuccessFull = false;
-        log('updateUserFirestore() timed out');
+        log.log('updateUserFirestore() timed out');
         return ShowSnackBar.snackError(
             title: "ERROR!", sub: "Please check your internet connection");
       });
@@ -176,7 +204,7 @@ class AuthController extends GetxController {
       isSuccessFull = false;
       ShowSnackBar.snackError(
           title: 'ERROR! ', sub: 'Please Contact Support for help');
-      log(e.toString());
+      log.log(e.toString());
     }
     return isSuccessFull;
   }
@@ -192,7 +220,7 @@ class AuthController extends GetxController {
       await _auth
           .signInWithEmailAndPassword(email: email, password: password)
           .then((value) => {
-                log("Value is $value"),
+                log.log("Value is $value"),
                 if (value.user != null)
                   {
                     isLoadingForLogin.value = false,
@@ -215,12 +243,12 @@ class AuthController extends GetxController {
       String errorMessage = Constants.firebaseAuthExceptions[error.code] ??
           "An undefined Error happened.";
       ShowSnackBar.snackError(title: 'ERROR!', sub: errorMessage);
-      log(error.code);
+      log.log(error.code);
     } catch (e) {
       isLoadingForLogin.value = false;
       ShowSnackBar.snackError(
           title: 'ERROR! ', sub: 'Please Contact Support for help');
-      log(e.toString());
+      log.log(e.toString());
     }
   }
 
@@ -234,7 +262,7 @@ class AuthController extends GetxController {
       await _auth
           .createUserWithEmailAndPassword(email: email, password: password)
           .then((value) async {
-        log(Gravatar(email).imageUrl(
+        log.log(Gravatar(email).imageUrl(
           size: 200,
           defaultImage: GravatarImage.retro,
           rating: GravatarRating.g,
@@ -248,13 +276,17 @@ class AuthController extends GetxController {
         );
         final UserModel user = UserModel(
           name: name,
-          photoUrl: imageUrl,
-          status: 'UNVERIFIED',
-          userID: value.user!.uid,
-          email: value.user!.email!,
-          role: 'GENERAL_USER',
+          email: email,
+          role: Role.STAFF,
+          status: Status.ACTIVE,
+          avatar: imageUrl,
+          username: name,
+          id: value.user!.uid,
+          pin: Random().nextInt(9999).toString().padLeft(4, '0'),
+          baseRate: 0.0,
+          employmentType: EmploymentType.BY_PART_TIME,
         );
-        log(user.toJson().toString());
+        log.log(user.toJson().toString());
         await _createUserFirestore(user, value.user!);
         await value.user!.sendEmailVerification();
         isLoadingForSignUp.value = false;
@@ -265,17 +297,17 @@ class AuthController extends GetxController {
         Get.back();
       });
     } on FirebaseAuthException catch (error) {
-      log(error.toString());
+      log.log(error.toString());
       String errorMessage = Constants.firebaseAuthExceptions[error.code] ??
           "An undefined Error happened.";
       ShowSnackBar.snackError(title: 'ERROR!', sub: errorMessage);
-      log(error.code);
+      log.log(error.code);
       isLoadingForSignUp.value = false;
       isSuccessFull = false;
 
       return isSuccessFull;
     } catch (e) {
-      log(e.toString());
+      log.log(e.toString());
       ShowSnackBar.snackError(
           title: 'ERROR!', sub: "Please Contact Support for help");
       isLoadingForSignUp.value = false;
@@ -286,6 +318,7 @@ class AuthController extends GetxController {
   }
 
   DocumentReference<Map<String, dynamic>> getDoc() {
+    log.log(firebaseUser.value!.uid.toString());
     return _db.collection('$usersDocFirebase').doc(firebaseUser.value?.uid);
   }
 
@@ -299,9 +332,9 @@ class AuthController extends GetxController {
       String errorMessage = Constants.firebaseAuthExceptions[error.code] ??
           "An undefined Error happened.";
       ShowSnackBar.snackError(title: 'ERROR!', sub: errorMessage);
-      log(error.message!);
+      log.log(error.message!);
     } catch (e) {
-      log(e.toString());
+      log.log(e.toString());
       ShowSnackBar.snackError(
           title: 'ERROR!', sub: "Please Contact Support for help");
     }
@@ -316,10 +349,33 @@ class AuthController extends GetxController {
       String errorMessage = Constants.firebaseAuthExceptions[error.code] ??
           "An undefined Error happened.";
       ShowSnackBar.snackError(title: 'ERROR!', sub: errorMessage);
-      log(error.code);
+      log.log(error.code);
     } catch (e) {
       ShowSnackBar.snackError(
           title: 'ERROR!', sub: "Please Contact Support for help");
+    }
+  }
+}
+
+enum UserRole {
+  admin,
+  user,
+}
+
+extension UserRoleExtension on UserRole {
+  bool get isAdmin => this == UserRole.admin;
+  bool get isUser => this == UserRole.user;
+}
+
+extension UserRoleX on String? {
+  UserRole? get toUserRole {
+    switch (this) {
+      case "ADMIN":
+        return UserRole.admin;
+      case "GENERAL_USER":
+        return UserRole.user;
+      default:
+        return null;
     }
   }
 }

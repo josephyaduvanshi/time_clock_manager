@@ -14,13 +14,58 @@ class DailyInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return Padding(
       padding: const EdgeInsets.all(defaultPadding),
-      decoration: const BoxDecoration(
+      child: Card(
+        elevation: 1,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
         color: secondaryColor,
-        borderRadius: BorderRadius.all(Radius.circular(10)),
+        child: Stack(
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                image: DecorationImage(
+                  image: AssetImage(
+                    info.image,
+                  ),
+                  fit: BoxFit.cover,
+                  colorFilter: ColorFilter.mode(
+                    Colors.black.withOpacity(0.2),
+                    BlendMode.dstATop,
+                  ),
+                ),
+              ),
+            ),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                info.title.text.xl
+                    .make()
+                    .p(5)
+                    .box
+                    .color(Colors.black.withOpacity(0.2))
+                    .customRounded(BorderRadius.circular(10))
+                    .makeCentered()
+                    .p(5),
+                const SizedBox(height: defaultPadding),
+                info.subtitle.text.lg
+                    .make()
+                    .p(5)
+                    .box
+                    .color(Colors.blueGrey.withOpacity(0.7))
+                    .customRounded(BorderRadius.circular(10))
+                    .makeCentered()
+                    .p(5),
+                const SizedBox(height: defaultPadding),
+                info.desc.text.make(),
+              ],
+            ),
+          ],
+        ),
       ),
-      child: "20 Hours".text.xl2.make().centered(),
     );
   }
 }

@@ -1,10 +1,13 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
-import 'package:time_clock_manager/controllers/auth_controller.dart';
 import 'package:time_clock_manager/utils/clockin_import_utils.dart';
+import 'package:time_clock_manager/utils/snack_bar_custom.dart';
 import 'package:time_clock_manager/utils/time_tactic_utils.dart';
 import 'package:velocity_x/velocity_x.dart';
 
 import '../constants.dart';
+import '../controllers/clockin_report_firestore_controller.dart';
 import '../responsive.dart';
 import 'daily_info_card_widget.dart';
 
@@ -31,62 +34,71 @@ class DashboardTiles extends StatelessWidget {
           spacing: defaultPadding * 7,
           runSpacing: defaultPadding,
           children: [
-            OutlinedButton.icon(
-              style: OutlinedButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+            Tooltip(
+              message: 'Import Clock In/Out Reports (Import The Text File)',
+              child: OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: defaultPadding * 1.5,
+                    vertical:
+                        defaultPadding / (Responsive.isMobile(context) ? 2 : 1),
+                  ),
                 ),
-                padding: EdgeInsets.symmetric(
-                  horizontal: defaultPadding * 1.5,
-                  vertical:
-                      defaultPadding / (Responsive.isMobile(context) ? 2 : 1),
-                ),
+                onPressed: _onPressedClockInOut,
+                icon: const Icon(Icons.cloud_upload_rounded),
+                label: const Text("Import Clock In/Out"),
+              ).shimmer(
+                primaryColor: Colors.purpleAccent,
+                secondaryColor: Colors.blue,
+                duration: const Duration(seconds: 7),
               ),
-              onPressed: _onPressedClockInOut,
-              icon: const Icon(Icons.cloud_upload_rounded),
-              label: const Text("Import Clock In/Out"),
-            ).shimmer(
-              primaryColor: Colors.purpleAccent,
-              secondaryColor: Colors.blue,
-              duration: const Duration(seconds: 7),
             ),
-            OutlinedButton.icon(
-              style: OutlinedButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+            Tooltip(
+              message: 'Import Daily Report (All Days)',
+              child: OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: defaultPadding * 1.5,
+                    vertical:
+                        defaultPadding / (Responsive.isMobile(context) ? 2 : 1),
+                  ),
                 ),
-                padding: EdgeInsets.symmetric(
-                  horizontal: defaultPadding * 1.5,
-                  vertical:
-                      defaultPadding / (Responsive.isMobile(context) ? 2 : 1),
-                ),
+                onPressed: () {},
+                icon: const Icon(Icons.cloud_upload_rounded),
+                label: const Text("Import Daily Report"),
+              ).shimmer(
+                primaryColor: Colors.purpleAccent,
+                secondaryColor: Colors.blue,
+                duration: const Duration(seconds: 7),
               ),
-              onPressed: _onPressedClockInOut,
-              icon: const Icon(Icons.cloud_upload_rounded),
-              label: const Text("Import Daily Report"),
-            ).shimmer(
-              primaryColor: Colors.purpleAccent,
-              secondaryColor: Colors.blue,
-              duration: const Duration(seconds: 7),
             ),
-            OutlinedButton.icon(
-              style: OutlinedButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+            Tooltip(
+              message: 'Import Deliveries (All Days)',
+              child: OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: defaultPadding * 1.5,
+                    vertical:
+                        defaultPadding / (Responsive.isMobile(context) ? 2 : 1),
+                  ),
                 ),
-                padding: EdgeInsets.symmetric(
-                  horizontal: defaultPadding * 1.5,
-                  vertical:
-                      defaultPadding / (Responsive.isMobile(context) ? 2 : 1),
-                ),
+                onPressed: _onPressedClockInOut,
+                icon: const Icon(Icons.cloud_upload_rounded),
+                label: const Text("Import Deliveries"),
+              ).shimmer(
+                primaryColor: Colors.purpleAccent,
+                secondaryColor: Colors.blue,
+                duration: const Duration(seconds: 7),
               ),
-              onPressed: _onPressedClockInOut,
-              icon: const Icon(Icons.cloud_upload_rounded),
-              label: const Text("Import Deliveries"),
-            ).shimmer(
-              primaryColor: Colors.purpleAccent,
-              secondaryColor: Colors.blue,
-              duration: const Duration(seconds: 7),
             ),
           ],
         ).p(16),
@@ -107,11 +119,23 @@ class DashboardTiles extends StatelessWidget {
 }
 
 void _onPressedClockInOut() async {
+  log(ClockinReportFireStoreController.to
+      .getTotalHoursForSpecificDate('2024-01-16')
+      .toString());
   final content = await TimeTacticUtils.importFiles();
+
   if (content != null) {
     final clockinUtils = ClockinReportUtils();
     final clockinReport = clockinUtils.finalJsonConvert(content);
     print(clockinReport);
+    await ClockinReportFireStoreController.to
+        .importDataToFirestore(clockinReport)
+        .onError((error, stackTrace) {
+      ShowSnackBar.snackError(
+        title: 'Error',
+        sub: 'Error importing data to firestore => $error',
+      );
+    });
   } else {
     print('No file selected.');
   }

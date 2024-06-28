@@ -1,5 +1,4 @@
 import 'dart:developer';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -21,10 +20,24 @@ void main() async {
   Get.put(AuthController());
 }
 
-class MyApp extends StatelessWidget {
-  
-  // This widget is the root of your application.
+RxString uid = FirebaseAuth.instance.currentUser!.uid.obs;
+final RxBool isAdmin = false.obs;
+final RxBool isStaff = false.obs;
+final RxBool isGreenway = false.obs;
+final Map<String, Map<String, String>> det = {
+  "Admin": {
+    "Greenway": "pKdC7Y0CSLSIrUvxJNaaTDVE9Nn1",
+    "Weston": "4fLLXdC6HjRHtq4iJm5U9TPqeB93",
+    "Joseph": "dBV9qJhCgbfQKdIIvF5l3yaOEgu1",
+  },
+  "Clockin": {
+    "Greenway": "F5LSW85sSRhRfcttWUcpUFLQ2mA3",
+    "Weston": "muMgv3rD26asc6jj04josNanYIa2",
+  }
+};
 
+class MyApp extends StatelessWidget {
+  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     log(AuthController.instance.loggedIn.toString());
@@ -33,11 +46,22 @@ class MyApp extends StatelessWidget {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.active) {
             User? user = snapshot.data;
+            if (snapshot.hasData) {
+              log("User is logged in");
+              uid = snapshot.data!.uid.obs;
+              // isStaff if it neither contains clockin and admin uids
+              isStaff.value = !det["Admin"]!.containsValue(uid.value) &&
+                  !det["Clockin"]!.containsValue(uid.value);
+              isAdmin.value = det["Admin"]!.containsValue(uid.value);
+
+              log("isAdmin: ${isAdmin.value}");
+              log("greenway uid ${det["Admin"]!["Greenway"]} uid: ${uid.value}");
+              log("isGreenway: ${isGreenway.value}");
+            }
             return GetMaterialApp(
               debugShowCheckedModeBanner: false,
               title: "Joseph'S Time Tactician",
               theme: ThemeData.dark().copyWith(
-                useMaterial3: true,
                 scaffoldBackgroundColor: bgColor,
                 textTheme:
                     GoogleFonts.poppinsTextTheme(Theme.of(context).textTheme)

@@ -1,53 +1,39 @@
-import 'package:flutter/material.dart';
-
-import '../constants.dart';
+import '../gen/assets.gen.dart';
 
 class DashboardTiles {
-  final String? svgSrc, title, totalStorage;
-  final int? numOfFiles, percentage;
-  final Color? color;
+  final String title, subtitle, desc, image;
 
   DashboardTiles({
-    this.svgSrc,
-    this.title,
-    this.totalStorage,
-    this.numOfFiles,
-    this.percentage,
-    this.color,
+    required this.title,
+    required this.subtitle,
+    required this.desc,
+    required this.image,
   });
 }
 
 List demoMyFiles = [
   DashboardTiles(
-    title: "Documents",
-    numOfFiles: 1328,
-    svgSrc: "assets/icons/Documents.svg",
-    totalStorage: "1.9GB",
-    color: primaryColor,
-    percentage: 35,
+    title: "Web Orders",
+    subtitle: "\$21132",
+    desc: "9.5%",
+    image: Assets.images.manoosh.path,
   ),
   DashboardTiles(
-    title: "Google Drive",
-    numOfFiles: 1328,
-    svgSrc: "assets/icons/google_drive.svg",
-    totalStorage: "2.9GB",
-    color: const Color(0xFFFFA113),
-    percentage: 35,
+    title: "DoorDash Orders",
+    subtitle: "\$212",
+    desc: "9.5%",
+    image: Assets.images.doordash.path,
   ),
   DashboardTiles(
-    title: "One Drive",
-    numOfFiles: 1328,
-    svgSrc: "assets/icons/one_drive.svg",
-    totalStorage: "1GB",
-    color: const Color(0xFFA4CDFF),
-    percentage: 10,
+    title: "UberEats Orders",
+    subtitle: "\$212",
+    desc: "9.5%",
+    image: Assets.images.uberEats.path,
   ),
   DashboardTiles(
-    title: "Documents",
-    numOfFiles: 5328,
-    svgSrc: "assets/icons/drop_box.svg",
-    totalStorage: "7.3GB",
-    color: const Color(0xFF007EE5),
-    percentage: 78,
+    title: "MenuLog Orders",
+    subtitle: "\$212",
+    desc: "9.5%",
+    image: Assets.images.menulog.path,
   ),
 ];

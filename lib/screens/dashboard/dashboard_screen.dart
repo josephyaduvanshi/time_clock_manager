@@ -26,7 +26,7 @@ class DashboardScreen extends StatelessWidget {
                     children: [
                       const DashboardTiles(),
                       const SizedBox(height: defaultPadding),
-                      const RecentFiles(),
+                      const RecentReportsClockin(),
                       if (Responsive.isMobile(context))
                         const SizedBox(height: defaultPadding),
                     ],

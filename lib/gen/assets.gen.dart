@@ -126,15 +126,30 @@ class $AssetsIconsGen {
 class $AssetsImagesGen {
   const $AssetsImagesGen();
 
+  /// File path: assets/images/Menulog.png
+  AssetGenImage get menulog => const AssetGenImage('assets/images/Menulog.png');
+
+  /// File path: assets/images/doordash.png
+  AssetGenImage get doordash =>
+      const AssetGenImage('assets/images/doordash.png');
+
   /// File path: assets/images/logo.png
   AssetGenImage get logo => const AssetGenImage('assets/images/logo.png');
+
+  /// File path: assets/images/manoosh.png
+  AssetGenImage get manoosh => const AssetGenImage('assets/images/manoosh.png');
 
   /// File path: assets/images/profile_pic.png
   AssetGenImage get profilePic =>
       const AssetGenImage('assets/images/profile_pic.png');
 
+  /// File path: assets/images/uber-eats.png
+  AssetGenImage get uberEats =>
+      const AssetGenImage('assets/images/uber-eats.png');
+
   /// List of all assets
-  List<AssetGenImage> get values => [logo, profilePic];
+  List<AssetGenImage> get values =>
+      [menulog, doordash, logo, manoosh, profilePic, uberEats];
 }
 
 class Assets {

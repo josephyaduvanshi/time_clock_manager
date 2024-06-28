@@ -54,7 +54,7 @@ class CustomButtonWithSplash extends StatelessWidget {
         child: Ink(
           height: height ?? 35,
           decoration: BoxDecoration(
-            color: Colors.blue,
+            color: colorDarkMode ?? Colors.blue,
             borderRadius: BorderRadius.circular(borderRadius ?? 8),
           ),
           child: Row(
