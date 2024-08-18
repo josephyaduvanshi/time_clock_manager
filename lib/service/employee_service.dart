@@ -11,7 +11,7 @@ class EmployeeFirestoreService {
   Stream<List<EmployeeModel>> getEmployees() {
     log('store: $store');
     return _db
-        .collection('users')
+        .collection('users_granite')
         .where('store', isEqualTo: store)
         .snapshots()
         .map((snapshot) => snapshot.docs

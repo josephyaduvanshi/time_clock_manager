@@ -37,7 +37,6 @@ final Map<String, Map<String, String>> det = {
 };
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     log(AuthController.instance.loggedIn.toString());

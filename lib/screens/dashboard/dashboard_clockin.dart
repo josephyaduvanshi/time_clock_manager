@@ -299,9 +299,9 @@ class ClockinClockOutApp extends GetView<DashBoardClockInController> {
                   child: DataTable(
                     sortColumnIndex: 0,
                     sortAscending: true,
-                    dataRowColor: MaterialStateProperty.resolveWith<Color>(
-                      (Set<MaterialState> states) {
-                        if (states.contains(MaterialState.selected))
+                    dataRowColor: WidgetStateProperty.resolveWith<Color>(
+                      (Set<WidgetState> states) {
+                        if (states.contains(WidgetState.selected))
                           return Theme.of(Get.context!)
                               .colorScheme
                               .primary

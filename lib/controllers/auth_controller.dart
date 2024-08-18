@@ -22,7 +22,7 @@ class AuthController extends GetxController {
 
   final RxString userName = ''.obs;
 
-  String usersDocFirebase = 'users';
+  String usersDocFirebase = 'users_granite';
   final RxString _store = ''.obs;
   String get store => _store.value;
 

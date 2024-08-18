@@ -32,7 +32,7 @@ class _UserAvailabilityCardState extends State<UserAvailabilityCard> {
   void _updateAvailabilityInFirestore() async {
     try {
       final employeeRef = FirebaseFirestore.instance
-          .collection('users')
+          .collection('users_granite')
           .doc(widget.employee.id);
 
       final updatedAvailability = {

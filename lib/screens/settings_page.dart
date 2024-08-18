@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:time_clock_manager/controllers/auth_controller.dart';
+import 'package:time_clock_manager/controllers/test_script.dart';
 import 'package:time_clock_manager/navigation/route_strings.dart';
+import 'package:time_clock_manager/screens/auth/sign_up_page.dart';
 import 'package:velocity_x/velocity_x.dart';
 
 import '../models/menu_item_model.dart';
@@ -21,7 +23,9 @@ class SettingsPage extends StatelessWidget {
     ),
     MenuItem(icon: Icons.person, label: "Profile Update", onTap: () {}),
     MenuItem(icon: Icons.security, label: "Security", onTap: () {}),
-    MenuItem(icon: Icons.person_add, label: "Create Employee", onTap: () {}),
+    MenuItem(icon: Icons.person_add, label: "Create Employee", onTap: () async{
+      await generateAndStoreTimeRecords();
+    }),
     MenuItem(
         icon: Icons.password_rounded,
         label: "User Pins",
@@ -32,8 +36,8 @@ class SettingsPage extends StatelessWidget {
     MenuItem(
         icon: Icons.create,
         label: "Create Account",
-        onTap: () {
-          Get.toNamed(RouteStrings.signUp);
+        onTap: ()  {
+           Get.to(() => SignUpUI());
         }),
     MenuItem(
         icon: Icons.logout,

@@ -46,7 +46,7 @@ class DashBoardClockInController extends GetxController {
 
   void fetchEmployees() {
     FirebaseFirestore.instance
-        .collection('users')
+        .collection('users_granite')
         .where('store', isEqualTo: store.value)
         .snapshots()
         .listen((snapshot) {
@@ -62,14 +62,14 @@ class DashBoardClockInController extends GetxController {
     DateTime endOfDay = DateTime(now.year, now.month, now.day, 23, 59, 59);
 
     var employeesWithRecords = await FirebaseFirestore.instance
-        .collection('users')
+        .collection('users_granite')
         .where('store', isEqualTo: store.value)
         .get();
     List<TimeRecord> allRecords = [];
 
     for (var employeeDoc in employeesWithRecords.docs) {
       var querySnapshot = await FirebaseFirestore.instance
-          .collection('users')
+          .collection('users_granite')
           .doc(employeeDoc.id)
           .collection('timeRecords')
           .where('clockIn',
@@ -88,7 +88,7 @@ class DashBoardClockInController extends GetxController {
 
   Future<void> clockIn(String employeeId, String pin) async {
     await FirebaseFirestore.instance
-        .collection('users')
+        .collection('users_granite')
         .doc(employeeId)
         .collection('timeRecords')
         .add({
@@ -102,7 +102,7 @@ class DashBoardClockInController extends GetxController {
 
   Future<void> clockOut(String employeeId, String pin) async {
     var collectionRef = FirebaseFirestore.instance
-        .collection('users')
+        .collection('users_granite')
         .doc(employeeId)
         .collection('timeRecords');
 
@@ -129,7 +129,7 @@ class DashBoardClockInController extends GetxController {
     }
 
     var querySnapshot = await FirebaseFirestore.instance
-        .collection('users')
+        .collection('users_granite')
         .doc(selectedEmployeeId.value)
         .collection('timeRecords')
         .orderBy('clockIn', descending: true)
@@ -161,7 +161,7 @@ class DashBoardClockInController extends GetxController {
     DateTime endOfDay = DateTime(now.year, now.month, now.day, 23, 59, 59);
 
     var querySnapshot = await FirebaseFirestore.instance
-        .collection('users')
+        .collection('users_granite')
         .doc(employeeId)
         .collection('timeRecords')
         .where('clockIn',

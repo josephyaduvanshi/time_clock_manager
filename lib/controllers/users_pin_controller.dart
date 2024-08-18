@@ -5,7 +5,7 @@ import 'package:time_clock_manager/main.dart';
 import '../models/enployee_model.dart';
 
 class UsersPinController extends GetxController {
-  String get _collection => "users";
+  String get _collection => "users_granite";
 
   RxList<EmployeeModel> employees = <EmployeeModel>[].obs;
 

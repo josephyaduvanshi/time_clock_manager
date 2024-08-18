@@ -9,7 +9,7 @@ class FirestoreService {
   Stream<List<EmployeeModel>> getEmployees() {
     final store = isGreenway.value ? "Greenway" : "Weston";
     return _db
-        .collection('users')
+        .collection('users_granite')
         .where('store', isEqualTo: store)
         .snapshots()
         .map((snapshot) => snapshot.docs
